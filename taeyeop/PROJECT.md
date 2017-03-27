@@ -6,8 +6,12 @@
     + ESP8266
     + Relay
   
++ Software Environment
+  + Arduino IDE
+  
 + IoT protocol
   + [ESP8266 MQTT client](http://www.hardcopyworld.com/ngine/aduino/index.php/archives/2804)
+  + Arduino "PubSubClient" library
 
 + Function
   + Power on/off
