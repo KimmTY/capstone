@@ -5,6 +5,7 @@
   + [Sonoff](http://sonoff.itead.cc/en/)
     + ESP8266
     + Relay
+  + [FTDI](https://randomnerdtutorials.com/how-to-flash-a-custom-firmware-to-sonoff/)
   
 + Software Environment
   + Arduino IDE
