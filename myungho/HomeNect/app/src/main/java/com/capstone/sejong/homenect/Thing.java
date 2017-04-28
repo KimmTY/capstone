@@ -5,13 +5,57 @@ package com.capstone.sejong.homenect;
  */
 
 public class Thing {
-    String name; // things 이름 or 맥주소
-    boolean status; // On/off 여부
-    int photoId; // 사진 찍어서 뷰 올리기
+    private String name; // things 이름 or 맥주소
+    private boolean status; // On/off 여부
+    private boolean wifiStatus; // wifi 연결상태 여부
+    private boolean timerStatus; // Timer On/Off 여부
+    private boolean gpsStatus; // gps on/off 여부
 
-    Thing(String name, boolean status, int photoId){
+    Thing(String name, boolean status, boolean wifiStatus, boolean timerStatus, boolean gpsStatus){
         this.name = name;
         this.status = status;
-        this.photoId = photoId;
+        this.wifiStatus = wifiStatus;
+        this.timerStatus = timerStatus;
+        this.gpsStatus = gpsStatus;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
+
+    public boolean isWifiStatus() {
+        return wifiStatus;
+    }
+
+    public void setWifiStatus(boolean wifiStatus) {
+        this.wifiStatus = wifiStatus;
+    }
+
+    public boolean isTimerStatus() {
+        return timerStatus;
+    }
+
+    public void setTimerStatus(boolean timerStatus) {
+        this.timerStatus = timerStatus;
+    }
+
+    public boolean isGpsStatus() {
+        return gpsStatus;
+    }
+
+    public void setGpsStatus(boolean gpsStatus) {
+        this.gpsStatus = gpsStatus;
     }
 }

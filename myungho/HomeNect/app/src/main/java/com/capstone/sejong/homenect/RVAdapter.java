@@ -1,14 +1,15 @@
 package com.capstone.sejong.homenect;
 
+import android.annotation.SuppressLint;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.Switch;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.List;
 
@@ -19,25 +20,49 @@ import java.util.List;
 public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ThingViewHolder>{
 
     public class ThingViewHolder extends RecyclerView.ViewHolder{
-        CardView cv;
-        TextView thingName;
-        Switch status;
-        ImageView thingPhoto;
+        CardView cv; // cardView
+        TextView thingName; // Thing 이름
+        TextView status; // Thing 상태 표시 (on/off)
+        ImageView wifi; // Thing wifi 연결상태 표시 (red / green)
+        ImageView timer; // Thing Timer 아이콘
+        ImageView gps; // Thing GPS 아이콘
+        ImageView thingIcon; // Thing 아이콘
+        RelativeLayout relativeLayout; // 배경
 
-        ThingViewHolder(View itemView){
+        ThingViewHolder(final View itemView){
             super(itemView);
             cv = (CardView)itemView.findViewById(R.id.cv);
+            relativeLayout = (RelativeLayout)itemView.findViewById(R.id.thing_background);
             thingName = (TextView)itemView.findViewById(R.id.thing_name);
-            status = (Switch)itemView.findViewById(R.id.thing_status);
-            thingPhoto = (ImageView)itemView.findViewById(R.id.thing_photo);
-            thingPhoto.setOnClickListener(new View.OnClickListener() {
+            status = (TextView)itemView.findViewById(R.id.status);
+            wifi = (ImageView)itemView.findViewById(R.id.iv_wifi_status);
+            timer = (ImageView)itemView.findViewById(R.id.iv_timer);
+            timer.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if((Integer)thingPhoto.getTag() == R.drawable.default_photo){
-                        Toast.makeText(v.getContext(), "ITEM PRESSED = " + String.valueOf(getAdapterPosition()), Toast.LENGTH_SHORT).show();
-                    } else{
-                        // 사진 찍어서 넣는 곳
-                        Toast.makeText(v.getContext(), "있던 사진 눌린겨", Toast.LENGTH_SHORT).show();
+                    if(things.get(getPosition()).isTimerStatus()){ // 켜진 상태라면 (꺼야함)
+                        things.get(getPosition()).setTimerStatus(false);
+                    } else { // 꺼진 상태라면 (켜야함)
+                        things.get(getPosition()).setStatus(true);
+                    }
+                }
+            });
+            gps = (ImageView)itemView.findViewById(R.id.iv_gps_status);
+            thingIcon = (ImageView)itemView.findViewById(R.id.thing_icon);
+            thingIcon.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(status.getText().equals("OFF")) { // 꺼진상태라면 (켜야함)
+                        relativeLayout.setBackgroundColor(ContextCompat.getColor(
+                                itemView.getContext(), R.color.colorLightBlue));
+                        things.get(getPosition()).setStatus(true); // 전원 on
+                        status.setText("ON");
+                    } else { // 켜진상태라면 (꺼야함)
+                        relativeLayout.setBackgroundColor(ContextCompat.getColor(
+                                itemView.getContext(), R.color.colorDarkGray));
+                        things.get(getPosition()).setStatus(false); // 전원 off
+                        status.setText("OFF");
+
                     }
                 }
             });
@@ -47,7 +72,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ThingViewHolder>{
     List<Thing> things;
 
     RVAdapter(List<Thing> things){
-        this.things = things;
+            this.things = things;
     }
 
     @Override
@@ -62,12 +87,37 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ThingViewHolder>{
         return tvh;
     }
 
+    @SuppressLint("NewApi")
     @Override
     public void onBindViewHolder(ThingViewHolder thingViewHolder, int i){
-        thingViewHolder.thingName.setText(things.get(i).name);
-        thingViewHolder.status.setChecked(things.get(i).status);
-        thingViewHolder.thingPhoto.setImageResource(things.get(i).photoId);
-        thingViewHolder.thingPhoto.setTag(things.get(i).photoId);
+        thingViewHolder.thingName.setText(things.get(i).getName());
+        if(things.get(i).isStatus()){ // 상태 초기화
+            thingViewHolder.status.setText("ON");
+            thingViewHolder.relativeLayout.setBackgroundColor(ContextCompat.getColor(
+                    thingViewHolder.relativeLayout.getContext(), R.color.colorLightBlue));
+        } else{
+            thingViewHolder.status.setText("OFF");
+            thingViewHolder.relativeLayout.setBackgroundColor(ContextCompat.getColor(
+                    thingViewHolder.relativeLayout.getContext(), R.color.colorDarkGray));
+        }
+        if(things.get(i).isWifiStatus()){
+            // wifi 색 초기화
+        } else{
+        }
+        if(things.get(i).isGpsStatus()){
+            // GPS 아이콘 색 초기화
+        } else{
+        }
+        if(things.get(i).isTimerStatus()){
+            // Timer 아이콘 색 초기화
+        } else{
+        }
+
+        thingViewHolder.wifi.setImageResource(R.drawable.circle);
+        thingViewHolder.timer.setImageResource(R.drawable.timer);
+        thingViewHolder.gps.setImageResource(R.drawable.gps);
+        thingViewHolder.thingIcon.setImageResource(R.drawable.power_button);
+
     }
 
     @Override

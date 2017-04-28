@@ -11,29 +11,58 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:id="@+id/thing_background"
         android:padding="16dp">
+        <!--android:background="@color/colorDarkGray">-->
+
         <ImageView
-            android:layout_width="100dp"
-            android:layout_height="150dp"
-            android:id="@+id/thing_photo"
+            android:id="@+id/thing_icon"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:layout_marginRight="16dp"/>
+            android:layout_marginRight="16dp" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/thing_name"
-            android:layout_toRightOf="@+id/thing_photo"
-            android:layout_alignParentTop="true"
-            android:textSize="30sp"/>
+            android:text="ThingName"
+            android:textColor="@color/colorWhite"
+            android:textSize="15sp"
+            android:layout_below="@+id/iv_wifi_status"
+            android:layout_toEndOf="@+id/thing_icon" />
 
-        <Switch
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_alignBottom="@+id/thing_icon"
+            android:layout_alignParentEnd="true"
+            android:id="@+id/iv_timer" />
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:id="@+id/iv_wifi_status" />
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginEnd="12dp"
+            android:layout_alignTop="@+id/iv_timer"
+            android:layout_toStartOf="@+id/iv_timer"
+            android:id="@+id/iv_gps_status" />
+
+        <TextView
+            android:text="status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/thing_status"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true" />
-
+            android:id="@+id/status"
+            android:textSize="15sp"
+            android:textColor="@color/colorWhite"
+            android:layout_above="@+id/iv_gps_status"
+            android:layout_toEndOf="@+id/thing_icon" />
 
     </RelativeLayout>
 

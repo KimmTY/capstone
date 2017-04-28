@@ -1,7 +1,7 @@
 package com.capstone.sejong.homenect;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,11 +12,8 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private int REQUEST_ACT = 1000;
-
     private List<Thing> things;
     private RecyclerView rv;
-    private FloatingActionButton fab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,29 +25,68 @@ public class MainActivity extends AppCompatActivity {
         rv.setLayoutManager(llm);
         rv.setHasFixedSize(true);
 
-        fab = (FloatingActionButton)findViewById(R.id.fab_settings);
+        things = new ArrayList<>();
+        things.add(new Thing("Capstone", false, false, false, false));
+        things.add(new Thing("Things", false, false, false, false));
 
-        initFab();
-        initializeData();
-        initializeAdapter();
+        final RVAdapter adapter = new RVAdapter(things);
+        rv.setAdapter(adapter);
+
+//        initializeData();
+
+        SwipeableRecyclerViewTouchListener swipeTouchListener = new SwipeableRecyclerViewTouchListener(rv, new SwipeableRecyclerViewTouchListener.SwipeListener() {
+            @Override // swipe event listener
+            public boolean canSwipeLeft(int position) {
+                return true;
+            }
+
+            @Override
+            public boolean canSwipeRight(int position) {
+                return true;
+            }
+
+            @Override
+            public void onDismissedBySwipeLeft(RecyclerView recyclerView, int[] reverseSortedPositions) {
+                for (int position : reverseSortedPositions) {
+                    things.remove(position);
+                    adapter.notifyItemRemoved(position);
+                }
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onDismissedBySwipeRight(RecyclerView recyclerView, int[] reverseSortedPositions) {
+                for (int position : reverseSortedPositions) {
+                    things.remove(position);
+                    adapter.notifyItemRemoved(position);
+                }
+                adapter.notifyDataSetChanged();
+            }
+        });
+
+        rv.addOnItemTouchListener(swipeTouchListener);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //STT 결과 받아오기 위한 함수
     }
 
     private void initializeData(){
         things = new ArrayList<>();
-        things.add(new Thing("Capstone", false, R.drawable.default_photo));
-        things.add(new Thing("Things", false, R.drawable.default_photo));
+        things.add(new Thing("Capstone", false, false, false, false));
+        things.add(new Thing("Things", false, false, false, false));
     }
 
     private void initializeAdapter(){
-        RVAdapter adapter = new RVAdapter(things);
-        rv.setAdapter(adapter);
+
     }
 
     private void initFab(){
         findViewById(R.id.fab_settings).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                things.add(new Thing("HomeNect", false, R.drawable.default_photo));
+                things.add(new Thing("HomeNect", false, false, false, false));
                 initializeAdapter();
             }
         });
