@@ -8,8 +8,8 @@
 #define EEPROM_SIZE 256
 
 //AP
-#define AP_SSID "HomNect"
-#define AP_PASSWORD "HomNect605"
+#define AP_SSID "HomeNect"
+#define AP_PASSWORD "HomeNect605"
 #define BUF_SIZE 40
 
 //MQTT
