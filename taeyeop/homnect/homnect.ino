@@ -28,7 +28,9 @@ const unsigned int ROM_TOPIC_SIZE_ADDR = 100;
 const unsigned int ROM_TOPIC_ADDR = ROM_TOPIC_SIZE_ADDR+1;
 const unsigned int ROM_FAULT = 0xff;
 
-const unsigned int RELAY_PIN = LED_BUILTIN;
+const unsigned int RELAY_PIN = 12;
+const unsigned int LED_PIN = 13;
+const unsigned int BUTTON_PIN = 0;
 const unsigned int OP_CODE_RELAY_OFF = 0;
 const unsigned int OP_CODE_RELAY_ON = 1;
 
@@ -95,7 +97,11 @@ void ap_set_info() {
 
 void gpio_init(void) {
   pinMode(RELAY_PIN, OUTPUT);
+  pinMode(BUTTON_PIN, INPUT);
+  pinMode(LED_PIN, OUTPUT);
+  
   digitalWrite(RELAY_PIN, HIGH);
+  digitalWrite(LED_PIN, HIGH);
   Serial.println("<<GPIO inited!>>");
 }
 
