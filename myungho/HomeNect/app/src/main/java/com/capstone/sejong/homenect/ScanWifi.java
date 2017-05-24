@@ -1,35 +1,25 @@
 package com.capstone.sejong.homenect;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
+import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.List;
 
-public class ScanWifi extends Activity implements View.OnClickListener{
-
-    private static final String TAG = "WIFIScanner";
+public class ScanWifi extends AppCompatActivity{
 
     // WifiManager variable
     WifiManager wifiManager;
-
-    TextView textStatus;
-    Button btnScanStart;
-    Button btnScanStop;
-
-    private int scanCount = 0;
-    String text = "";
-    String result = "";
+    boolean mResult;
 
     private List<ScanResult> mScanResult; // ScanResult List
 
@@ -48,21 +38,19 @@ public class ScanWifi extends Activity implements View.OnClickListener{
 
     public void getWIFIScanResult() {
         mScanResult = wifiManager.getScanResults(); // ScanResult
-        this.textStatus.setText("Scan count is \t" + ++this.scanCount + " times \n");
-        this.textStatus.append("=======================================\n");
 
         for(int i = 0; i < this.mScanResult.size(); ++i) {
             ScanResult result = mScanResult.get(i);
-
+            if(result.SSID.toString().contains("HomeNect")){
+                mResult = true;
+                showInputSSidandPwd();
+                finish();
+            }
 //            this.textStatus.append(i + 1 + ". SSID : " + result.SSID.toString() + "\t\t RSSI : " + result.level + " dBm\n"); ssid 이름이랑 dBm값
         }
-
-        this.textStatus.append("=======================================\n");
     }
 
     public void initWIFIScan() {
-        this.scanCount = 0;
-        this.text = "";
         IntentFilter filter = new IntentFilter("android.net.wifi.SCAN_RESULTS");
         filter.addAction("android.net.wifi.STATE_CHANGE");
         this.registerReceiver(this.mReceiver, filter);
@@ -76,14 +64,7 @@ public class ScanWifi extends Activity implements View.OnClickListener{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scan_wifi);
 
-        // Setup UI
-        textStatus = (TextView) findViewById(R.id.textStatus);
-        btnScanStart = (Button) findViewById(R.id.btnScanStart);
-        btnScanStop = (Button) findViewById(R.id.btnScanStop);
-
-        // Setup OnClickListener
-        btnScanStart.setOnClickListener(this);
-        btnScanStop.setOnClickListener(this);
+        mResult = false;
 
         // Setup WIFI
         wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
@@ -92,20 +73,31 @@ public class ScanWifi extends Activity implements View.OnClickListener{
         if(wifiManager.isWifiEnabled() == false){
             wifiManager.setWifiEnabled(true);
         }
+
+        initWIFIScan();
     }
 
     @Override
-    public void onClick(View v) {
-        if(v.getId() == R.id.btnScanStart){
-            initWIFIScan();
+    protected void onDestroy()
+    {
+        unregisterReceiver(mReceiver); // mReceiver 제거
+        if(!mResult){
+            Toast.makeText(getApplicationContext(), "주변에 HomeNect가 없습니다!", Toast.LENGTH_LONG).show();
         }
-        if(v.getId() == R.id.btnScanStop){
-            unregisterReceiver(mReceiver);
-        }
-
+        super.onDestroy();
     }
 
-/*    public void sendAPInfo(String ssid, String pwd) throws IOException {
-        ApiGenerator.getInstance().sendApInfo(new ApInfo(ssid, pwd, "01027655255")).execute();
-    }*/
+    public void showInputSSidandPwd() {
+        String networkSSID = "HomeNect";
+        String networkPwd = "HomeNect605";
+
+        WifiConfiguration conf = new WifiConfiguration();
+        conf.SSID = "\"" + networkSSID + "\""; // Please note the quotes
+        conf.preSharedKey = "\"" + networkPwd + "\"";
+        conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE); // Open network
+        WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        wifiManager.addNetwork(conf); // thing 을 wifi로 해서 연결
+
+        startActivity(new Intent(ScanWifi.this, SSidPwdDialog.class)); // show dialog
+    }
 }

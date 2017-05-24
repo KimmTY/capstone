@@ -21,7 +21,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ScanWifi" />
+        <activity android:name=".ScanWifi"
+            android:theme="@style/Theme.AppCompat.Dialog.Alert" />
         <activity
             android:name=".AddGuest"
             android:theme="@style/Theme.AppCompat.Dialog.Alert"
