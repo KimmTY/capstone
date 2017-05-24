@@ -18,7 +18,7 @@ SimpleTimer timer;
 
 //MQTT
 #define MQTT_SERVER "172.20.10.3"
-#define MQTT_SERVER_PORT 1883
+#define MQTT_SERVER_PORT 8080
 
 const unsigned int ROM_SSID_SIZE_ADDR = 0;
 const unsigned int ROM_SSID_ADDR = ROM_SSID_SIZE_ADDR+1;
@@ -138,6 +138,7 @@ void recv_ap_info() {
   ap_set_info();
 
   server.stop();
+  is_station_mode = true;
   start_wifi_station();
 }
 
@@ -169,8 +170,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
   unsigned int opCode = data["value"]["opCode"];
   Serial.print("data[opCode] : ");
   Serial.println(opCode);
-  if(opCode == OP_CODE_RELAY_ON) digitalWrite(RELAY_PIN, LOW);
-  else if(opCode == OP_CODE_RELAY_OFF) digitalWrite(RELAY_PIN, HIGH);  
+  if(opCode == OP_CODE_RELAY_ON) digitalWrite(RELAY_PIN, HIGH);
+  else if(opCode == OP_CODE_RELAY_OFF) digitalWrite(RELAY_PIN, LOW);  
 }
 
 void start_wifi_station(void) {
@@ -180,31 +181,34 @@ void start_wifi_station(void) {
   Serial.print(stn_ssid);
   Serial.print(" PWD : ");
   Serial.println(stn_pwd);
-  Serial.print(" WIFI connecting...");
   WiFi.softAPdisconnect();
   WiFi.begin(stn_ssid, stn_pwd);
-  delay(1000);
-  if(WiFi.status() == WL_CONNECTED) {
-    Serial.println("");
-    Serial.println("WiFi connected!");
-    Serial.print("IP address: ");
-    Serial.println(WiFi.localIP());
-    
-    Serial.println("");
-    Serial.print("Mqtt server host: ");
-    Serial.print(MQTT_SERVER);
-    Serial.print(" Mqtt server port: ");
-    Serial.println(MQTT_SERVER_PORT);
-    mqtt_client.setServer(MQTT_SERVER, MQTT_SERVER_PORT);
-    mqtt_client.setCallback(callback);
-    is_station_mode = true;
-    digitalWrite(RELAY_PIN, LOW);
-    Serial.println("<<WiFi Station inited!>>");
-    return;
+  Serial.print(" WIFI connecting...");
+  while(WiFi.status() != WL_CONNECTED && is_station_mode) {
+    delay(100);
+    Serial.print(".");
+    timer.run();
+    gpio_state();
   }
+  
+  Serial.println("");
+  Serial.println("WiFi connected!");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+  
+  Serial.println("");
+  Serial.print("Mqtt server host: ");
+  Serial.print(MQTT_SERVER);
+  Serial.print(" Mqtt server port: ");
+  Serial.println(MQTT_SERVER_PORT);
+  mqtt_client.setServer(MQTT_SERVER, MQTT_SERVER_PORT);
+  mqtt_client.setCallback(callback);
+  digitalWrite(RELAY_PIN, LOW);
+  Serial.println("<<WiFi Station inited!>>");
 }
 
 void start_wifi_ap(void) {
+  is_station_mode = false;
   Serial.println("");
   Serial.println("AP mode started...");
   WiFi.disconnect();
@@ -215,7 +219,6 @@ void start_wifi_ap(void) {
 
   server.on("/ap/info", recv_ap_info);
   server.begin();
-  is_station_mode = false;
   digitalWrite(RELAY_PIN, HIGH);
   Serial.println("<<WiFi AP inited!>>");
 }
@@ -239,7 +242,7 @@ void timeout_callback() {
   digitalWrite(LED_PIN, (is_led_on && is_station_mode) ? HIGH : LOW);
   is_led_on = !is_led_on;
   
-  if(!mqtt_client.connected()) return;
+  if(WiFi.status() != WL_CONNECTED) return;
 
   String str = update_status_payload_prefix + digitalRead(RELAY_PIN) + update_status_payload_suffix;
   Serial.print("PAYLOAD : ");
@@ -254,32 +257,32 @@ void timer_init() {
 
 void mqtt_pub_init() {
     if(WiFi.status() != WL_CONNECTED) start_wifi_station();
-    else {
-        if (mqtt_client.connect("ESP8266Client")) {
-            Serial.print("connected! sub mqtt topic : ");
-            Serial.println(mqtt_topic);
-            mqtt_client.subscribe(mqtt_topic);
-        } else {
-            Serial.print("failed, rc=");
-            Serial.println(mqtt_client.state());
-            delay(1000);
-        }
+    if (is_station_mode && mqtt_client.connect("ESP8266Client")) {
+        Serial.print("connected! sub mqtt topic : ");
+        Serial.println(mqtt_topic);
+        mqtt_client.subscribe(mqtt_topic);
+    } else {
+        Serial.print("failed, rc=");
+        Serial.println(mqtt_client.state());
+        delay(100);
     }
 }
 
 void gpio_state(void) {
-  while(digitalRead(BUTTON_PIN) == LOW && button_delay_count < 30) {
+  while(digitalRead(BUTTON_PIN) == LOW) {
     button_delay_count++;
     delay(100);
+    if(button_delay_count > 30) {
+      if(is_station_mode)
+        start_wifi_ap();
+    }
+    timer.run();
   }
+  
   if(button_delay_count > 0) {
     if(button_delay_count < 30) {
-      Serial.println("short");
       digitalWrite(RELAY_PIN, (is_relay_on) ? HIGH : LOW);
       is_relay_on = !is_relay_on;
-    } else {
-      Serial.println("long");
-      start_wifi_ap();
     }
     button_delay_count = 0;
   }
