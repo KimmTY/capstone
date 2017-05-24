@@ -64,6 +64,14 @@
             android:layout_above="@+id/iv_gps_status"
             android:layout_toEndOf="@+id/thing_icon" />
 
+        <TextView
+            android:id="@+id/time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_alignStart="@+id/iv_gps_status" />
+
     </RelativeLayout>
 
 </android.support.v7.widget.CardView>

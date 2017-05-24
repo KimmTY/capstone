@@ -8,21 +8,24 @@ import android.content.Context;
  */
 
 public class SharedPreferences {
-    public final static String PREF_INTRO_USER_AGREEMENT = "PREF_USER_AGREEMENT";
-    public final static String PREF_MAIN_VALUE = "PREF_MAIN_VALUE";
-
-    static Context mContext;
+    Context mContext;
 
     public SharedPreferences(Context c) {
         mContext = c;
     }
 
+    /**
+     *
+     * @param key key data
+     * @param value 저장할 값
+     * @param prefName file 이름
+     */
     public void putValue(String key, String value, String prefName) {
         android.content.SharedPreferences pref = mContext.getSharedPreferences(prefName,
                 Activity.MODE_PRIVATE);
         android.content.SharedPreferences.Editor editor = pref.edit();
 
-        editor.putString(key, value);
+        editor.putString(key, value); // value 저장
         editor.commit();
     }
 
@@ -31,10 +34,17 @@ public class SharedPreferences {
                 Activity.MODE_PRIVATE);
         android.content.SharedPreferences.Editor editor = pref.edit();
 
-        editor.putBoolean(key, value);
+        editor.putBoolean(key, value); // value 저장
         editor.commit();
     }
 
+    /**
+     *
+     * @param key key data
+     * @param dftValue key의 value가 Null이면 dftValue반환
+     * @param prefName file 이름
+     * @return
+     */
     public String getValue(String key, String dftValue, String prefName) {
         android.content.SharedPreferences pref = mContext.getSharedPreferences(prefName,
                 Activity.MODE_PRIVATE);
@@ -56,7 +66,8 @@ public class SharedPreferences {
     }
 
     public void removeAllPreferences(String prefName){
-        android.content.SharedPreferences pref = mContext.getSharedPreferences(prefName, Activity.MODE_PRIVATE);
+        android.content.SharedPreferences pref = mContext.getSharedPreferences(prefName,
+                Activity.MODE_PRIVATE);
         android.content.SharedPreferences.Editor editor = pref.edit();
         editor.clear();
         editor.commit();

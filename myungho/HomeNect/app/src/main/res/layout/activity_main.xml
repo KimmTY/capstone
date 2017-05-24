@@ -14,13 +14,4 @@
     android:id="@+id/rv">
 
     </android.support.v7.widget.RecyclerView>
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab_settings"
-        style="@style/FabSettings_Style"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_gravity="bottom|right"
-        android:layout_margin="25dp"/>
 </RelativeLayout>

@@ -9,6 +9,7 @@ public class Thing {
     private boolean status; // On/off 여부
     private boolean wifiStatus; // wifi 연결상태 여부
     private boolean timerStatus; // Timer On/Off 여부
+    private String timerTime; // Timer 시간
     private boolean gpsStatus; // gps on/off 여부
 
     Thing(String name, boolean status, boolean wifiStatus, boolean timerStatus, boolean gpsStatus){
@@ -58,4 +59,8 @@ public class Thing {
     public void setGpsStatus(boolean gpsStatus) {
         this.gpsStatus = gpsStatus;
     }
+
+    public void setTimerTime(String time){ this.timerTime = time; }
+
+    public String getTimerTime(){ return this.timerTime; }
 }

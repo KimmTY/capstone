@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/add_thing"
+        android:orderInCategory="1"
+        android:title="Thing 추가" />
+    <item
+        android:id="@+id/add_user"
+        android:orderInCategory="2"
+        android:title="사용자 추가" />
+</menu>
