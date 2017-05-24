@@ -34,9 +34,9 @@ const unsigned int BUTTON_PIN = 0;
 const unsigned int OP_CODE_RELAY_OFF = 0;
 const unsigned int OP_CODE_RELAY_ON = 1;
 
-char stn_ssid[BUF_SIZE];
-char stn_pwd[BUF_SIZE];
-char mqtt_topic[BUF_SIZE];
+char stn_ssid[BUF_SIZE] = {0,};
+char stn_pwd[BUF_SIZE] = {0,};
+char mqtt_topic[BUF_SIZE] = {0,};
 
 String mac_addr;
 String update_status_payload_prefix;
@@ -44,12 +44,18 @@ String update_status_payload_suffix;
 
 bool is_station_mode;
 
+bool is_relay_on;
+bool is_led_on;
+int button_state;
+unsigned int button_delay_count;
+
 ESP8266WebServer server(80);
 WiFiClient wifi_client;
 PubSubClient mqtt_client(wifi_client);
 
 void eeprom_read(const unsigned int addr, char *data) {
   uint8_t data_size = EEPROM.read(addr);
+  if(data_size >= BUF_SIZE) return;
   for(unsigned int i=0;i<data_size && i<BUF_SIZE;i++) {
     data[i] = EEPROM.read(addr+1+i);
   }
@@ -80,6 +86,8 @@ void ap_init() {
   Serial.print("EEPROM TOPIC : ");
   Serial.println(mqtt_topic);
   Serial.println("<<AP inited!>>");
+
+  is_station_mode = true;
 }
 
 void ap_set_info() {
@@ -97,12 +105,16 @@ void ap_set_info() {
 
 void gpio_init(void) {
   pinMode(RELAY_PIN, OUTPUT);
-  pinMode(BUTTON_PIN, INPUT);
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
   pinMode(LED_PIN, OUTPUT);
   
-  digitalWrite(RELAY_PIN, HIGH);
-  digitalWrite(LED_PIN, HIGH);
+  digitalWrite(RELAY_PIN, LOW);
+  digitalWrite(LED_PIN, LOW);
   Serial.println("<<GPIO inited!>>");
+
+  button_delay_count = 0;
+  is_relay_on = false;
+  is_led_on = false;
 }
 
 void recv_ap_info() {
@@ -126,7 +138,7 @@ void recv_ap_info() {
   ap_set_info();
 
   server.stop();
-  wifi_init();
+  start_wifi_station();
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {
@@ -161,40 +173,38 @@ void callback(char* topic, byte* payload, unsigned int length) {
   else if(opCode == OP_CODE_RELAY_OFF) digitalWrite(RELAY_PIN, HIGH);  
 }
 
-void wifi_init(void) {
-  if(strlen(stn_ssid) > 0) {
-    unsigned int count = 0;
-    Serial.print("SSID : ");
-    Serial.print(stn_ssid);
-    Serial.print(" PWD : ");
-    Serial.println(stn_pwd);
-    Serial.print(" WIFI connecting...");
-    WiFi.softAPdisconnect();
-    WiFi.begin(stn_ssid, stn_pwd);
-    while (WiFi.status() != WL_CONNECTED) {
-      delay(300);
-      Serial.print(".");
-    }
-    if(count < 20) {
-      Serial.println("");
-      Serial.println("WiFi connected!");
-      Serial.print("IP address: ");
-      Serial.println(WiFi.localIP());
-      
-      Serial.println("");
-      Serial.print("Mqtt server host: ");
-      Serial.print(MQTT_SERVER);
-      Serial.print(" Mqtt server port: ");
-      Serial.println(MQTT_SERVER_PORT);
-      mqtt_client.setServer(MQTT_SERVER, MQTT_SERVER_PORT);
-      mqtt_client.setCallback(callback);
-      is_station_mode = true;
-      digitalWrite(RELAY_PIN, LOW);
-      Serial.println("<<WiFi Station inited!>>");
-      return;
-    }
-  }
+void start_wifi_station(void) {
+  if(strlen(stn_ssid) == 0) return;
   
+  Serial.print("SSID : ");
+  Serial.print(stn_ssid);
+  Serial.print(" PWD : ");
+  Serial.println(stn_pwd);
+  Serial.print(" WIFI connecting...");
+  WiFi.softAPdisconnect();
+  WiFi.begin(stn_ssid, stn_pwd);
+  delay(1000);
+  if(WiFi.status() == WL_CONNECTED) {
+    Serial.println("");
+    Serial.println("WiFi connected!");
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
+    
+    Serial.println("");
+    Serial.print("Mqtt server host: ");
+    Serial.print(MQTT_SERVER);
+    Serial.print(" Mqtt server port: ");
+    Serial.println(MQTT_SERVER_PORT);
+    mqtt_client.setServer(MQTT_SERVER, MQTT_SERVER_PORT);
+    mqtt_client.setCallback(callback);
+    is_station_mode = true;
+    digitalWrite(RELAY_PIN, LOW);
+    Serial.println("<<WiFi Station inited!>>");
+    return;
+  }
+}
+
+void start_wifi_ap(void) {
   Serial.println("");
   Serial.println("AP mode started...");
   WiFi.disconnect();
@@ -226,6 +236,9 @@ void mac_init() {
 }
 
 void timeout_callback() {
+  digitalWrite(LED_PIN, (is_led_on && is_station_mode) ? HIGH : LOW);
+  is_led_on = !is_led_on;
+  
   if(!mqtt_client.connected()) return;
 
   String str = update_status_payload_prefix + digitalRead(RELAY_PIN) + update_status_payload_suffix;
@@ -240,8 +253,8 @@ void timer_init() {
 }
 
 void mqtt_pub_init() {
-    if(WiFi.status() != WL_CONNECTED) wifi_init();
-    while (!mqtt_client.connected()) {
+    if(WiFi.status() != WL_CONNECTED) start_wifi_station();
+    else {
         if (mqtt_client.connect("ESP8266Client")) {
             Serial.print("connected! sub mqtt topic : ");
             Serial.println(mqtt_topic);
@@ -254,6 +267,24 @@ void mqtt_pub_init() {
     }
 }
 
+void gpio_state(void) {
+  while(digitalRead(BUTTON_PIN) == LOW && button_delay_count < 30) {
+    button_delay_count++;
+    delay(100);
+  }
+  if(button_delay_count > 0) {
+    if(button_delay_count < 30) {
+      Serial.println("short");
+      digitalWrite(RELAY_PIN, (is_relay_on) ? HIGH : LOW);
+      is_relay_on = !is_relay_on;
+    } else {
+      Serial.println("long");
+      start_wifi_ap();
+    }
+    button_delay_count = 0;
+  }
+}
+
 void setup() {
   Serial.begin(115200);
   Serial.println("Setup Start!");
@@ -261,7 +292,7 @@ void setup() {
   ap_init();
   gpio_init();
   mac_init();
-  wifi_init();
+  start_wifi_station();
   timer_init();
 }
 
@@ -275,4 +306,5 @@ void loop() {
     }
     mqtt_client.loop();
   }
+  gpio_state();
 }
