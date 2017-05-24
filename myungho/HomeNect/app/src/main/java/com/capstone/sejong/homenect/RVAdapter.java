@@ -43,15 +43,19 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ThingViewHolder>{
             timer.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    if(!things.get(getPosition()).isStatus()){
+                        return; // 전원상태 꺼져있으면 기능수행 X
+                    }
                     if(things.get(getPosition()).isTimerStatus()){ // 켜진 상태라면 (꺼야함)
-                        things.get(getPosition()).setGpsStatus(false);
+                        things.get(getPosition()).setTimerStatus(false);
                         timer.setImageResource(R.drawable.timer);
                     } else { // 꺼진 상태라면 (켜야함)
-                        things.get(getPosition()).setGpsStatus(true);
+                        things.get(getPosition()).setTimerStatus(true);
                         timer.setImageResource(R.drawable.timer_on);
                         if(mContext instanceof AdapterCallback){
                             ((AdapterCallback)mContext).showTimerDialog(getPosition()); // 타이머 다이얼로그
                         }
+                        time.setText(things.get(getPosition()).getTimerTime());
                     }
                 }
             });
@@ -59,6 +63,9 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ThingViewHolder>{
             gps.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    if(!things.get(getPosition()).isStatus()){
+                        return; // 전원상태 꺼져있으면 기능수행 X
+                    }
                     if(things.get(getPosition()).isGpsStatus()){ // 켜진 상태라면 (꺼야함)
                         things.get(getPosition()).setGpsStatus(false);
                         gps.setImageResource(R.drawable.gps);
@@ -114,6 +121,10 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ThingViewHolder>{
     @Override
     public void onBindViewHolder(ThingViewHolder thingViewHolder, int i){
         thingViewHolder.thingName.setText(things.get(i).getName());
+        thingViewHolder.thingIcon.setImageResource(R.drawable.power_button);
+        thingViewHolder.time.setText(things.get(i).getTimerTime());
+
+
         if(things.get(i).isStatus()){ // 상태 초기화
             thingViewHolder.status.setText("ON");
             thingViewHolder.relativeLayout.setBackgroundColor(ContextCompat.getColor(
@@ -122,24 +133,29 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ThingViewHolder>{
             thingViewHolder.status.setText("OFF");
             thingViewHolder.relativeLayout.setBackgroundColor(ContextCompat.getColor(
                     thingViewHolder.relativeLayout.getContext(), R.color.colorDarkGray));
+            thingViewHolder.wifi.setImageResource(R.drawable.circle);
+            thingViewHolder.timer.setImageResource(R.drawable.timer);
+            thingViewHolder.gps.setImageResource(R.drawable.gps);
+            return;
         }
         if(things.get(i).isWifiStatus()){
             // wifi 색 초기화
+            thingViewHolder.wifi.setImageResource(R.drawable.circle_green);
         } else{
+            thingViewHolder.wifi.setImageResource(R.drawable.circle_red);
         }
         if(things.get(i).isGpsStatus()){
             // GPS 아이콘 색 초기화
+            thingViewHolder.gps.setImageResource(R.drawable.gps_on);
         } else{
+            thingViewHolder.gps.setImageResource(R.drawable.gps);
         }
         if(things.get(i).isTimerStatus()){
             // Timer 아이콘 색 초기화
+            thingViewHolder.timer.setImageResource(R.drawable.timer_on);
         } else{
+            thingViewHolder.timer.setImageResource(R.drawable.timer);
         }
-
-        thingViewHolder.wifi.setImageResource(R.drawable.circle);
-        thingViewHolder.timer.setImageResource(R.drawable.timer);
-        thingViewHolder.gps.setImageResource(R.drawable.gps);
-        thingViewHolder.thingIcon.setImageResource(R.drawable.power_button);
 
     }
 
@@ -147,6 +163,5 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ThingViewHolder>{
     public int getItemCount(){
         return things.size();
     }
-
 
 }

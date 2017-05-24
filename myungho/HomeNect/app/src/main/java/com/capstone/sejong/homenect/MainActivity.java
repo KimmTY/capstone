@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
     private List<Thing> things;
     private RecyclerView rv;
     SharedPreferences pref;
+    RVAdapter adapter;
 
     int position;
     int hour_x;
@@ -38,6 +39,8 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+
         rv = (RecyclerView)findViewById(R.id.rv);
         LinearLayoutManager llm = new LinearLayoutManager(this);
         rv.setLayoutManager(llm);
@@ -47,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
         things.add(new Thing("Capstone", false, false, false, false));
         things.add(new Thing("Things", false, false, false, false));
 
-        final RVAdapter adapter = new RVAdapter(this, things);
+        adapter = new RVAdapter(this, things);
         rv.setAdapter(adapter);
 
         retrofit = new Retrofit.Builder().baseUrl(ApiService.API_URL).build();
@@ -77,6 +80,7 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
                 //do add thing
                 break;
             case R.id.add_user:
+                startActivity(new Intent(MainActivity.this, AddGuest.class));
 /*                // 임시로 기기 Ap정보 보내는 코드 넣어보기
                 Map<String, Object> map = new ArrayMap<>();
                 //put something inside the map, could be null
@@ -141,7 +145,6 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
     protected Dialog onCreateDialog(int id)
     {
         if (id == TIME_PICKER_DIALOG_ID)
-
             return new TimePickerDialog(MainActivity.this, kTimePickerListener, hour_x, minute_x, false);
         return null;
     }
@@ -153,6 +156,8 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
             minute_x = minute;
             things.get(position).setTimerTime(hour_x + ":" + minute_x);
             Toast.makeText(MainActivity.this, hour_x + ":" + minute_x, Toast.LENGTH_SHORT).show();
+            adapter.things.get(position).setTimerTime(hour_x + ":" + minute_x);
+            adapter.notifyDataSetChanged();
         }
     };
 
