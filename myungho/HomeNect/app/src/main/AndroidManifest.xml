@@ -22,7 +22,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".ScanWifi"
-            android:theme="@style/Theme.AppCompat.Dialog.Alert" />
+            android:theme="@style/Theme.AppCompat.Dialog.Alert"/>
         <activity
             android:name=".AddGuest"
             android:theme="@style/Theme.AppCompat.Dialog.Alert"

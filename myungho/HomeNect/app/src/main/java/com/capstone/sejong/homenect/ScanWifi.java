@@ -11,6 +11,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.widget.Toast;
 
 import java.util.List;
@@ -99,5 +100,10 @@ public class ScanWifi extends AppCompatActivity{
         wifiManager.addNetwork(conf); // thing 을 wifi로 해서 연결
 
         startActivity(new Intent(ScanWifi.this, SSidPwdDialog.class)); // show dialog
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev){
+        return false;
     }
 }
