@@ -5,13 +5,37 @@ package com.capstone.sejong.homenect;
  */
 
 public class ApInfo {
-    final String ssid;
-    final String password;
-    final String topic;
+    String ssid;
+    String pwd;
+    String topic;
 
-    ApInfo(String ssid, String password, String topic){
+    ApInfo(String ssid, String pwd, String topic){
         this.ssid = ssid;
-        this.password = password;
+        this.pwd = pwd;
+        this.topic = topic;
+    }
+
+    public String getSsid() {
+        return ssid;
+    }
+
+    public void setSsid(String ssid) {
+        this.ssid = ssid;
+    }
+
+    public String getPwd() {
+        return pwd;
+    }
+
+    public void setPwd(String pwd) {
+        this.pwd = pwd;
+    }
+
+    public String getTopic() {
+        return topic;
+    }
+
+    public void setTopic(String topic) {
         this.topic = topic;
     }
 }

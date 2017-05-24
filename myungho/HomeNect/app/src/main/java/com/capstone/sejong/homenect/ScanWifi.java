@@ -16,7 +16,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
-public class ScanWifi extends Activity implements View.OnClickListener {
+public class ScanWifi extends Activity implements View.OnClickListener{
 
     private static final String TAG = "WIFIScanner";
 
@@ -53,7 +53,8 @@ public class ScanWifi extends Activity implements View.OnClickListener {
 
         for(int i = 0; i < this.mScanResult.size(); ++i) {
             ScanResult result = mScanResult.get(i);
-            this.textStatus.append(i + 1 + ". SSID : " + result.SSID.toString() + "\t\t RSSI : " + result.level + " dBm\n");
+
+//            this.textStatus.append(i + 1 + ". SSID : " + result.SSID.toString() + "\t\t RSSI : " + result.level + " dBm\n"); ssid 이름이랑 dBm값
         }
 
         this.textStatus.append("=======================================\n");
@@ -103,4 +104,8 @@ public class ScanWifi extends Activity implements View.OnClickListener {
         }
 
     }
+
+/*    public void sendAPInfo(String ssid, String pwd) throws IOException {
+        ApiGenerator.getInstance().sendApInfo(new ApInfo(ssid, pwd, "01027655255")).execute();
+    }*/
 }

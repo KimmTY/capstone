@@ -22,9 +22,14 @@
             </intent-filter>
         </activity>
         <activity android:name=".ScanWifi" />
-        <activity android:name=".AddGuest"
+        <activity
+            android:name=".AddGuest"
             android:theme="@style/Theme.AppCompat.Dialog.Alert"
-            android:windowSoftInputMode="stateAlwaysVisible"></activity>
+            android:windowSoftInputMode="stateAlwaysVisible" />
+        <activity
+            android:name=".SSidPwdDialog"
+            android:theme="@style/Theme.AppCompat.Dialog.Alert"
+            android:windowSoftInputMode="stateAlwaysVisible" />
     </application>
 
 </manifest>

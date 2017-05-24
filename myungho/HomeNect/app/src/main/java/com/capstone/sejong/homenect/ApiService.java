@@ -1,11 +1,8 @@
 package com.capstone.sejong.homenect;
 
-import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.POST;
-import retrofit2.http.Path;
 
 /**
  * Created by 12aud on 2017-05-19.
@@ -25,7 +22,15 @@ public interface ApiService {
     @GET("comments")
     Call<ResponseBody>getCommentStr(@Query("postId")String postId);
 */
+/*
+    @POST("ap/info")
+    Call<ApInfo>sendApInfo(@Body ApInfo params);*/
 
     @POST("ap/info")
-    Call<ResponseBody>sendApInfo(@Path("ap/info") String postfix, @Body RequestBody params);
+    Call<ApInfo> sendApInfo(@Body String body);
+
+/*
+    @FormUrlEncoded
+    @POST("ap/info")
+    public void sendApInfoooo(@Field("ssid") String ssid, @Field("pwd") String pwd, @Field("topic") String topic);*/
 }

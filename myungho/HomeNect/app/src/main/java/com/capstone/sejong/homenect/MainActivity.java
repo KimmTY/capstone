@@ -2,7 +2,10 @@ package com.capstone.sejong.homenect;
 
 import android.app.Dialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -22,17 +25,18 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
 
     public static int TIME_PICKER_DIALOG_ID = 0;
 
-    Retrofit retrofit;
-    ApiService apiService;
+    Retrofit retrofit; // HTTP Request를 위한 retrofit lib
+    ApiService apiService; // API interface
 
     private List<Thing> things;
     private RecyclerView rv;
-    SharedPreferences pref;
-    RVAdapter adapter;
+    RVAdapter adapter; //
 
-    int position;
-    int hour_x;
-    int minute_x;
+    SharedPreferences pref; // things 데이터 저장하기 위한 내부 DB
+
+    int position; // thing position
+    int hour_x; // 예약시간
+    int minute_x; // 예약 분
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,8 +80,22 @@ public class MainActivity extends AppCompatActivity implements AdapterCallback {
         switch (item.getItemId()) {
 
             case R.id.add_thing:
-                startActivity(new Intent(MainActivity.this, ScanWifi.class));
+//                startActivity(new Intent(MainActivity.this, ScanWifi.class));
                 //do add thing
+                String networkSSID = "HomeNect";
+                String networkPwd = "HomeNect605";
+
+                WifiConfiguration conf = new WifiConfiguration();
+                conf.SSID = "\"" + networkSSID + "\""; // Please note the quotes
+                conf.preSharedKey = "\"" + networkPwd + "\"";
+                conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE); // Open network
+                WifiManager wifiManager = (WifiManager)getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                wifiManager.addNetwork(conf);
+
+
+
+                startActivity(new Intent(MainActivity.this, SSidPwdDialog.class));
+
                 break;
             case R.id.add_user:
                 startActivity(new Intent(MainActivity.this, AddGuest.class));
