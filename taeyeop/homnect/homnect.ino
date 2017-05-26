@@ -176,6 +176,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 void start_wifi_station(void) {
   if(strlen(stn_ssid) == 0) return;
+  if(WiFi.status() == WL_CONNECTED) return;
   
   Serial.print("SSID : ");
   Serial.print(stn_ssid);
@@ -242,7 +243,7 @@ void timeout_callback() {
   digitalWrite(LED_PIN, (is_led_on && is_station_mode) ? HIGH : LOW);
   is_led_on = !is_led_on;
   
-  if(WiFi.status() != WL_CONNECTED) return;
+  if(!mqtt_client.connected()) return;
 
   String str = update_status_payload_prefix + digitalRead(RELAY_PIN) + update_status_payload_suffix;
   Serial.print("PAYLOAD : ");
@@ -256,15 +257,16 @@ void timer_init() {
 }
 
 void mqtt_pub_init() {
-    if(WiFi.status() != WL_CONNECTED) start_wifi_station();
-    if (is_station_mode && mqtt_client.connect("ESP8266Client")) {
-        Serial.print("connected! sub mqtt topic : ");
-        Serial.println(mqtt_topic);
-        mqtt_client.subscribe(mqtt_topic);
-    } else {
-        Serial.print("failed, rc=");
-        Serial.println(mqtt_client.state());
-        delay(100);
+    start_wifi_station();
+    if(WiFi.status() == WL_CONNECTED) {
+      if (is_station_mode && mqtt_client.connect("ESP8266Client")) {
+          Serial.print("connected! sub mqtt topic : ");
+          Serial.println(mqtt_topic);
+          mqtt_client.subscribe(mqtt_topic);
+      } else {
+          Serial.print("failed, rc=");
+          Serial.println(mqtt_client.state());
+      }
     }
 }
 
