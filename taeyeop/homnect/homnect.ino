@@ -17,7 +17,7 @@ SimpleTimer timer;
 #define BUF_SIZE 40
 
 //MQTT
-#define MQTT_SERVER "172.20.10.3"
+#define MQTT_SERVER "192.168.43.205"
 #define MQTT_SERVER_PORT 8080
 
 const unsigned int ROM_SSID_SIZE_ADDR = 0;
@@ -134,10 +134,12 @@ void recv_ap_info() {
   Serial.print(stn_pwd);
   Serial.print(" topic=");
   Serial.println(mqtt_topic);
-  server.send(200, "text/html", "{\"data\":{\"result\":\"success\"}}");
+  server.send(200, "text/html", "{\"data\":{\"result\":\"success\",\"macAddr\":\"" + mac_addr + "\"}}");
   ap_set_info();
 
   server.stop();
+  WiFi.disconnect();
+  WiFi.softAPdisconnect(true);
   is_station_mode = true;
   start_wifi_station();
 }
@@ -182,14 +184,12 @@ void start_wifi_station(void) {
   Serial.print(stn_ssid);
   Serial.print(" PWD : ");
   Serial.println(stn_pwd);
-  WiFi.softAPdisconnect();
   WiFi.begin(stn_ssid, stn_pwd);
   Serial.print(" WIFI connecting...");
   while(WiFi.status() != WL_CONNECTED && is_station_mode) {
-    delay(100);
-    Serial.print(".");
     timer.run();
     gpio_state();
+    delay(50);
   }
   
   Serial.println("");
@@ -204,12 +204,12 @@ void start_wifi_station(void) {
   Serial.println(MQTT_SERVER_PORT);
   mqtt_client.setServer(MQTT_SERVER, MQTT_SERVER_PORT);
   mqtt_client.setCallback(callback);
-  digitalWrite(RELAY_PIN, LOW);
   Serial.println("<<WiFi Station inited!>>");
 }
 
 void start_wifi_ap(void) {
   is_station_mode = false;
+  digitalWrite(LED_PIN, LOW);
   Serial.println("");
   Serial.println("AP mode started...");
   WiFi.disconnect();
@@ -220,17 +220,11 @@ void start_wifi_ap(void) {
 
   server.on("/ap/info", recv_ap_info);
   server.begin();
-  digitalWrite(RELAY_PIN, HIGH);
   Serial.println("<<WiFi AP inited!>>");
 }
 
-void mac_init() {
-  uint8_t mac_uint8[6];
-  char mac_char[20];
-  
-  WiFi.macAddress(mac_uint8);
-  sprintf(mac_char, "%02X:%02X:%02X:%02X:%02X:%02X", mac_uint8[0], mac_uint8[1], mac_uint8[2], mac_uint8[3], mac_uint8[4], mac_uint8[5]);
-  mac_addr = String(mac_char);
+void mac_init() {  
+  mac_addr = WiFi.macAddress();
   update_status_payload_prefix = "{\"data\":{\"from\":\"thing\",\"to\":\"app\",\"category\":\"updateStatus\",\"value\":{\"macAddr\":\"" + mac_addr + "\",\"status\":\"";
   update_status_payload_suffix = "\"}}}";
   
@@ -246,9 +240,11 @@ void timeout_callback() {
   if(!mqtt_client.connected()) return;
 
   String str = update_status_payload_prefix + digitalRead(RELAY_PIN) + update_status_payload_suffix;
-  Serial.print("PAYLOAD : ");
-  Serial.println(str);
   const char *payload = str.c_str();
+  Serial.print("PAYLOAD : ");
+  Serial.println(payload);
+  Serial.print("TOPIC : ");
+  Serial.println(mqtt_topic);
   mqtt_client.publish(mqtt_topic, payload);
 }
 
@@ -297,8 +293,8 @@ void setup() {
   ap_init();
   gpio_init();
   mac_init();
-  start_wifi_station();
   timer_init();
+  start_wifi_station();
 }
 
 void loop() {
