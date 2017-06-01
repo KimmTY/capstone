@@ -66,11 +66,23 @@
 
         <TextView
             android:id="@+id/time"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorWhite"
+            android:gravity="right"
+            android:layout_centerVertical="true"
+            android:layout_alignEnd="@+id/iv_gps_status" />
+
+        <TextView
+            android:id="@+id/timerTimeControl"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
+            android:text="OFF"
+            android:gravity="center"
+            android:textColor="@color/colorWhite"
             android:layout_centerVertical="true"
-            android:layout_alignStart="@+id/iv_gps_status" />
+            android:layout_alignParentEnd="true" />
+
 
     </RelativeLayout>
 

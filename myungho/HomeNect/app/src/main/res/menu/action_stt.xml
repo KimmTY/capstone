@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:HomeNect="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_gps"
+        android:icon="@drawable/gps"
+        android:title="gps"
+        HomeNect:showAsAction="always" />
+
+    <item android:id="@+id/action_stt"
+        android:icon="@drawable/microphone"
+        android:title="stt"
+        HomeNect:showAsAction="always" />
+
+    <item android:id="@+id/add_user"
+        android:title="@string/add_user"
+        android:orderInCategory="100"
+        HomeNect:showAsAction="never" />
+    <item
+        android:id="@+id/add_thing"
+        android:orderInCategory="101"
+        android:title="@string/add_thing"
+        HomeNect:showAsAction="never"/>
+    <item
+        android:id="@+id/add_guest"
+        android:orderInCategory="102"
+        android:title="@string/add_guest"
+        HomeNect:showAsAction="never"/>
+</menu>

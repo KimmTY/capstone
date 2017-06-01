@@ -1,7 +1,8 @@
 package com.capstone.sejong.homenect;
 
 import retrofit2.Call;
-import retrofit2.http.Body;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
 /**
@@ -9,25 +10,25 @@ import retrofit2.http.POST;
  */
 
 public interface ApiService {
-    public static final String API_URL = "http://jsonplaceholder.typicode.com/";
-
 /*
-    @GET("comments")
-    Call<ResponseBody>getComment(@Query("postId")int postId); // get
-
-    @POST("comments")
-    Call<ResponseBody>getPostComment(@Query("postId")int postId); // post
-
-    //String version
-    @GET("comments")
-    Call<ResponseBody>getCommentStr(@Query("postId")String postId);
+    @POST("ap/info")
+    Call<ApInfo> sendApInfo(@Body ApInfo params);
 */
-/*
-    @POST("ap/info")
-    Call<ApInfo>sendApInfo(@Body ApInfo params);*/
 
     @POST("ap/info")
-    Call<ApInfo> sendApInfo(@Body String body);
+    @FormUrlEncoded
+    Call<ApInfo> sendApInfo(@Field("ssid") String ssid,
+                            @Field("pwd") String pwd,
+                            @Field("topic") String topic);
+
+/*
+    @Headers( "Content-Type: application/json" )
+    @POST("ap/info")
+    Call<JsonElement> sendApInfo(@Body JsonObject body);
+*/
+
+/*    @POST("ap/info")
+    Call<ApInfo> sendApInfo(@Body String body);*/
 
 /*
     @FormUrlEncoded

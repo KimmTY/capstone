@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.capstone.sejong.homenect.AddUser">
+    <EditText
+        android:id="@+id/et_add_user"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="8"
+        android:inputType="phone"
+        android:hint = "'-'제외하고 입력"
+        android:maxLength="11"
+        android:layout_marginTop="39dp"
+        android:layout_below="@+id/textView2"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:id="@+id/btn_ok_add_user"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="확인"
+        android:layout_marginStart="79dp"
+        android:layout_marginTop="25dp"
+        android:layout_below="@+id/et_add_user"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:id="@+id/btn_cancel_add_user"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="취소"
+        android:layout_marginStart="47dp"
+        android:layout_alignBaseline="@+id/btn_ok_add_user"
+        android:layout_alignBottom="@+id/btn_ok_add_user"
+        android:layout_toEndOf="@+id/btn_ok_add_user" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignStart="@+id/et_add_user"
+        android:textSize="30dp"
+        android:gravity="center"
+        android:text="사용자 추가"
+        android:layout_alignEnd="@+id/et_add_user" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/et_add_user"
+        android:layout_below="@+id/textView"
+        android:text="사용자로 등록할 핸드폰 번호를 입력해주세요"
+        android:layout_alignEnd="@+id/textView" />
+</RelativeLayout>

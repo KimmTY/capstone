@@ -7,12 +7,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.widget.Toast;
 
 import java.util.List;
 
@@ -20,6 +20,7 @@ public class ScanWifi extends AppCompatActivity{
 
     // WifiManager variable
     WifiManager wifiManager;
+    WifiInfo wifiInfo;
     boolean mResult;
 
     private List<ScanResult> mScanResult; // ScanResult List
@@ -38,17 +39,22 @@ public class ScanWifi extends AppCompatActivity{
     };
 
     public void getWIFIScanResult() {
-        mScanResult = wifiManager.getScanResults(); // ScanResult
-
+        showInputSSidandPwd();
+//                setResult(100); // 결과 ok 설정
+/*        mScanResult = wifiManager.getScanResults(); // ScanResult
         for(int i = 0; i < this.mScanResult.size(); ++i) {
             ScanResult result = mScanResult.get(i);
             if(result.SSID.toString().contains("HomeNect")){
                 mResult = true;
+                wifiInfo = wifiManager.getConnectionInfo();
+                String macAddr = wifiInfo.getMacAddress(); // mac address
+
                 showInputSSidandPwd();
+//                setResult(100); // 결과 ok 설정
                 finish();
             }
 //            this.textStatus.append(i + 1 + ". SSID : " + result.SSID.toString() + "\t\t RSSI : " + result.level + " dBm\n"); ssid 이름이랑 dBm값
-        }
+        }*/
     }
 
     public void initWIFIScan() {
@@ -82,9 +88,9 @@ public class ScanWifi extends AppCompatActivity{
     protected void onDestroy()
     {
         unregisterReceiver(mReceiver); // mReceiver 제거
-        if(!mResult){
+/*        if(!mResult){
             Toast.makeText(getApplicationContext(), "주변에 HomeNect가 없습니다!", Toast.LENGTH_LONG).show();
-        }
+        }*/
         super.onDestroy();
     }
 
@@ -100,6 +106,7 @@ public class ScanWifi extends AppCompatActivity{
         wifiManager.addNetwork(conf); // thing 을 wifi로 해서 연결
 
         startActivity(new Intent(ScanWifi.this, SSidPwdDialog.class)); // show dialog
+        finish();
     }
 
     @Override

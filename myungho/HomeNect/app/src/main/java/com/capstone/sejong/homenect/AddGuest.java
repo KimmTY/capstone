@@ -1,5 +1,6 @@
 package com.capstone.sejong.homenect;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -25,6 +26,10 @@ public class AddGuest extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (validatePhoneNumber(et.getText().toString())) { // 유효한 핸드폰 번호일 경우
+
+                    Intent intent = new Intent();
+                    intent.putExtra("guest", et.getText().toString()); // 핸드폰 번호 넘겨주기
+                    setResult(RESULT_OK, intent);
                     Toast.makeText(getApplicationContext(), "등록 완료", Toast.LENGTH_SHORT).show();
                     finish();
                 } else {

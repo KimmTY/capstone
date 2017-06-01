@@ -6,4 +6,5 @@ package com.capstone.sejong.homenect;
 
 public interface AdapterCallback {
     void showTimerDialog(int position);
+    void mqttPublish(String control, int position);
 }

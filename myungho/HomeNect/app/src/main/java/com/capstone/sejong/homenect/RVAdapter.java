@@ -27,6 +27,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ThingViewHolder>{
         TextView time; // 예약제어 시간 표시 (11:05)
         ImageView wifi; // Thing wifi 연결상태 표시 (red / green)
         ImageView timer; // Thing Timer 아이콘
+        TextView timerTimeControl; // 예약시 on/off 여부
         ImageView gps; // Thing GPS 아이콘
         ImageView thingIcon; // Power 아이콘
         RelativeLayout relativeLayout; // 배경
@@ -43,18 +44,17 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ThingViewHolder>{
             timer.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(!things.get(getPosition()).isStatus()){
-                        return; // 전원상태 꺼져있으면 기능수행 X
-                    }
                     if(things.get(getPosition()).isTimerStatus()){ // 켜진 상태라면 (꺼야함)
                         things.get(getPosition()).setTimerStatus(false);
                         timer.setImageResource(R.drawable.timer);
+                        pref.putValue("timerStatus", false, things.get(getPosition()).getName());
                     } else { // 꺼진 상태라면 (켜야함)
                         things.get(getPosition()).setTimerStatus(true);
                         timer.setImageResource(R.drawable.timer_on);
                         if(mContext instanceof AdapterCallback){
                             ((AdapterCallback)mContext).showTimerDialog(getPosition()); // 타이머 다이얼로그
                         }
+                        pref.putValue("timerStatus", true, things.get(getPosition()).getName());
                         time.setText(things.get(getPosition()).getTimerTime());
                     }
                 }
@@ -63,9 +63,6 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ThingViewHolder>{
             gps.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(!things.get(getPosition()).isStatus()){
-                        return; // 전원상태 꺼져있으면 기능수행 X
-                    }
                     if(things.get(getPosition()).isGpsStatus()){ // 켜진 상태라면 (꺼야함)
                         things.get(getPosition()).setGpsStatus(false);
                         gps.setImageResource(R.drawable.gps);
@@ -73,6 +70,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ThingViewHolder>{
                         things.get(getPosition()).setGpsStatus(true);
                         gps.setImageResource(R.drawable.gps_on);
                     }
+                    pref.putValue("gpsStatus", things.get(getPosition()).isGpsStatus(), things.get(getPosition()).getName());
                 }
             });
             thingIcon = (ImageView)itemView.findViewById(R.id.thing_icon);
@@ -82,14 +80,31 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ThingViewHolder>{
                     if(status.getText().equals("OFF")) { // 꺼진상태라면 (켜야함)
                         relativeLayout.setBackgroundColor(ContextCompat.getColor(
                                 itemView.getContext(), R.color.colorLightBlue));
+                        ((AdapterCallback)mContext).mqttPublish("powerOn", getPosition()); // 파워 컨트롤
                         things.get(getPosition()).setStatus(true); // 전원 on
                         status.setText("ON");
                     } else { // 켜진상태라면 (꺼야함)
                         relativeLayout.setBackgroundColor(ContextCompat.getColor(
                                 itemView.getContext(), R.color.colorDarkGray));
+                        ((AdapterCallback)mContext).mqttPublish("powerOff", getPosition()); // 파워 컨트롤
                         things.get(getPosition()).setStatus(false); // 전원 off
                         status.setText("OFF");
-
+                    }
+                }
+            });
+            timerTimeControl = (TextView) itemView.findViewById(R.id.timerTimeControl);
+            timerTimeControl.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(timerTimeControl.getText().equals("OFF")){ // 꺼진 상태라면 켜야함
+                        // mqtt publish
+                        timerTimeControl.setText("ON");
+                        things.get(getPosition()).setTimerTimeControl(true);
+                        ((AdapterCallback)mContext).mqttPublish("saveSchedule", getPosition()); // 예약 기능
+                    }else {
+                        timerTimeControl.setText("OFF");
+                        things.get(getPosition()).setTimerTimeControl(false);
+                        ((AdapterCallback)mContext).mqttPublish("saveSchedule", getPosition()); // 예약 기능
                     }
                 }
             });
@@ -103,6 +118,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ThingViewHolder>{
     RVAdapter(Context context, List<Thing> things){
             this.things = things;
             this.mContext = context;
+        pref = new SharedPreferences(mContext);
     }
 
     @Override
@@ -123,7 +139,9 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ThingViewHolder>{
         thingViewHolder.thingName.setText(things.get(i).getName());
         thingViewHolder.thingIcon.setImageResource(R.drawable.power_button);
         thingViewHolder.time.setText(things.get(i).getTimerTime());
-
+        thingViewHolder.wifi.setImageResource(R.drawable.circle_red);
+        thingViewHolder.timer.setImageResource(R.drawable.timer);
+        thingViewHolder.gps.setImageResource(R.drawable.gps);
 
         if(things.get(i).isStatus()){ // 상태 초기화
             thingViewHolder.status.setText("ON");
@@ -133,10 +151,6 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ThingViewHolder>{
             thingViewHolder.status.setText("OFF");
             thingViewHolder.relativeLayout.setBackgroundColor(ContextCompat.getColor(
                     thingViewHolder.relativeLayout.getContext(), R.color.colorDarkGray));
-            thingViewHolder.wifi.setImageResource(R.drawable.circle);
-            thingViewHolder.timer.setImageResource(R.drawable.timer);
-            thingViewHolder.gps.setImageResource(R.drawable.gps);
-            return;
         }
         if(things.get(i).isWifiStatus()){
             // wifi 색 초기화
@@ -156,7 +170,12 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ThingViewHolder>{
         } else{
             thingViewHolder.timer.setImageResource(R.drawable.timer);
         }
-
+        if(things.get(i).isTimerTimeControl()){
+            // Timer 제어 on/off 표시
+            thingViewHolder.timerTimeControl.setText("ON");
+        } else {
+            thingViewHolder.timerTimeControl.setText("OFF");
+        }
     }
 
     @Override

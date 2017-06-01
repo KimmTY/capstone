@@ -1,15 +1,30 @@
 package com.capstone.sejong.homenect;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Created by 12aud on 2017-05-19.
  */
 
 public class ApInfo {
+    @SerializedName("ssid")
+    @Expose
     String ssid;
+    @SerializedName("pwd")
+    @Expose
     String pwd;
+    @SerializedName("topic")
+    @Expose
     String topic;
+//    @SerializedName("macAddr")
+//    @Expose
+//    String macAddr;
+//    @SerializedName("result")
+//    @Expose
+//    String result;
 
-    ApInfo(String ssid, String pwd, String topic){
+    ApInfo(String ssid, String pwd, String topic) {
         this.ssid = ssid;
         this.pwd = pwd;
         this.topic = topic;
@@ -37,5 +52,31 @@ public class ApInfo {
 
     public void setTopic(String topic) {
         this.topic = topic;
+    }
+
+/*
+    public String getMacAddr() {
+        return macAddr;
+    }
+
+    public void setMacAddr(String macAddr) {
+        this.macAddr = macAddr;
+    }
+
+    public void setResult(String result) {
+        this.result = result;
+    }
+
+    public String getResult() {
+        return result;
+    }
+*/
+
+    @Override
+    public String toString() {
+        return "ApInfo{" +
+                "macAddr='" + ssid + '\'' +
+                ", result='" + pwd +
+                '}';
     }
 }
