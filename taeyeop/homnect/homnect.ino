@@ -17,8 +17,8 @@ SimpleTimer timer;
 #define BUF_SIZE 40
 
 //MQTT
-#define MQTT_SERVER "192.168.43.205"
-#define MQTT_SERVER_PORT 8080
+#define MQTT_SERVER "58.236.6.251"
+#define MQTT_SERVER_PORT 1883
 
 const unsigned int ROM_SSID_SIZE_ADDR = 0;
 const unsigned int ROM_SSID_ADDR = ROM_SSID_SIZE_ADDR+1;
@@ -28,15 +28,15 @@ const unsigned int ROM_TOPIC_SIZE_ADDR = 100;
 const unsigned int ROM_TOPIC_ADDR = ROM_TOPIC_SIZE_ADDR+1;
 const unsigned int ROM_FAULT = 0xff;
 
-const unsigned int RELAY_PIN = 12;
+const unsigned int RELAY_PIN = BUILTIN_LED;
 const unsigned int LED_PIN = 13;
 const unsigned int BUTTON_PIN = 0;
 const unsigned int OP_CODE_RELAY_OFF = 0;
 const unsigned int OP_CODE_RELAY_ON = 1;
 
-char stn_ssid[BUF_SIZE] = {0,};
-char stn_pwd[BUF_SIZE] = {0,};
-char mqtt_topic[BUF_SIZE] = {0,};
+char stn_ssid[BUF_SIZE] = "Bob'siPhone";
+char stn_pwd[BUF_SIZE] = "13572468";
+char mqtt_topic[BUF_SIZE] = "01091095924";
 
 String mac_addr;
 String update_status_payload_prefix;
@@ -72,17 +72,17 @@ void eeprom_write(const unsigned int addr, char *data, const unsigned int data_s
 void ap_init() {
   EEPROM.begin(EEPROM_SIZE);
   
-  memset(stn_ssid, 0, sizeof(stn_ssid));
-  memset(stn_pwd, 0, sizeof(stn_pwd));
-  memset(mqtt_topic, 0, sizeof(mqtt_topic));
+//  memset(stn_ssid, 0, sizeof(stn_ssid));
+//  memset(stn_pwd, 0, sizeof(stn_pwd));
+//  memset(mqtt_topic, 0, sizeof(mqtt_topic));
   
-  eeprom_read(ROM_SSID_SIZE_ADDR, stn_ssid);
+//  eeprom_read(ROM_SSID_SIZE_ADDR, stn_ssid);
   Serial.print("EEPROM SSID : ");
   Serial.println(stn_ssid);
-  eeprom_read(ROM_PWD_SIZE_ADDR, stn_pwd);
+//  eeprom_read(ROM_PWD_SIZE_ADDR, stn_pwd);
   Serial.print("EEPROM PWD : ");
   Serial.println(stn_pwd);
-  eeprom_read(ROM_TOPIC_SIZE_ADDR, mqtt_topic);
+//  eeprom_read(ROM_TOPIC_SIZE_ADDR, mqtt_topic);
   Serial.print("EEPROM TOPIC : ");
   Serial.println(mqtt_topic);
   Serial.println("<<AP inited!>>");
@@ -134,7 +134,7 @@ void recv_ap_info() {
   Serial.print(stn_pwd);
   Serial.print(" topic=");
   Serial.println(mqtt_topic);
-  server.send(200, "text/html", "{\"data\":{\"result\":\"success\",\"macAddr\":\"" + mac_addr + "\"}}");
+  server.send(200, "text/html", "{\"data\":{\"ssid\":\"success\",\"pwd\":\"" + mac_addr + "\"}}");
   ap_set_info();
 
   server.stop();
@@ -174,6 +174,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.println(opCode);
   if(opCode == OP_CODE_RELAY_ON) digitalWrite(RELAY_PIN, HIGH);
   else if(opCode == OP_CODE_RELAY_OFF) digitalWrite(RELAY_PIN, LOW);  
+
+  memset(payload, 0, length);
 }
 
 void start_wifi_station(void) {
